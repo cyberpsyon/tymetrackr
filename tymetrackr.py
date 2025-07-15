@@ -29,6 +29,18 @@ def calculate_total_hours(start, end):
     duration = end_dt - start_dt
     return round(duration.total_seconds() / 3600, 2)
 
+def clock_in():
+    if os.path.exists("clockin.json"):
+        print("Already clocked in. Clock out before starting a new session.")
+        return
+
+    start_time = datetime.now().strftime("%H:%M")
+    current_date = date.today().isoformat()
+    with open("clockin.json", "w") as f:
+        json.dump({"date": current_date, "start": start_time}, f)
+
+    print(f"Clocked in at {start_time} on {current_date}")
+    
 def clock_out():
     if not os.path.exists("clockin.json"):
         print("No clock-in found. Please clock in first.")
