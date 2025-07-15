@@ -1,0 +1,16 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# SQLite database file
+*.db
+
+# Environment files
+.env
+
+# VSCode Settings
+.vscode/
+
+# Logs and temp
+*.log
