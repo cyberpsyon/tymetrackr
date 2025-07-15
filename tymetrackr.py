@@ -50,13 +50,13 @@ def view_entries():
         print("No entries found.")
         return
 
-    print("\n🕒 Logged Time Entries:")
+    print("\n Logged Time Entries:")
     print("-" * 80)
     for row in rows:
         entry_id, date, start, end, role, task, notes, hours = row
         print(f"[{entry_id}] {date} | {start}-{end} | {role:<6} | {hours} hrs | {task}")
         if notes:
-            print(f"  📝 Notes: {notes}")
+            print(f"   Notes: {notes}")
         print("-" * 80)
 
 def delete_entry(entry_id):
@@ -65,14 +65,52 @@ def delete_entry(entry_id):
     c.execute("SELECT * FROM entries WHERE id = ?", (entry_id,))
     row = c.fetchone()
     if not row:
-        print(f"❌ Entry with ID {entry_id} not found.")
+        print(f"Entry with ID {entry_id} not found.")
         conn.close()
         return
 
     c.execute("DELETE FROM entries WHERE id = ?", (entry_id,))
     conn.commit()
     conn.close()
-    print(f"🗑️ Deleted entry ID {entry_id}")
+    
+def add_interactive():
+    print("\n📝 Add a Time Entry\n" + "-"*30)
+    date = input("Date (YYYY-MM-DD): ")
+    start = input("Start Time (HH:MM): ")
+    end = input("End Time (HH:MM): ")
+    role = input("Role (e.g. TA, AppSec): ")
+    task = input("Task Description: ")
+    notes = input("Optional Notes: ")
+
+    add_entry(date, start, end, role, task, notes)
+    
+def main_menu():
+    while True:
+        print("\n==============================")
+        print("      ⏱️  TymeTrackr Menu")
+        print("==============================")
+        print("1. Add time entry")
+        print("2. View entries")
+        print("3. Delete an entry")
+        print("4. Quit")
+        print("------------------------------")
+        choice = input("Choose an option (1-4): ")
+
+        if choice == "1":
+            add_interactive()
+        elif choice == "2":
+            view_entries()
+        elif choice == "3":
+            entry_id = input("Enter the entry ID to delete: ")
+            if entry_id.isdigit():
+                delete_entry(int(entry_id))
+            else:
+                print("❌ Invalid ID.")
+        elif choice == "4":
+            print("👋 Goodbye!")
+            break
+        else:
+            print("❌ Invalid choice. Please enter a number 1–4.")
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Time Tracking CLI Tool")
@@ -81,6 +119,8 @@ if __name__ == "__main__":
     parser_init = subparsers.add_parser("init", help="Initialize the database")
     parser_delete = subparsers.add_parser("delete", help="Delete an entry by ID")
     parser_delete.add_argument("--id", type=int, required=True, help="Entry ID to delete")
+    parser_prompt = subparsers.add_parser("prompt", help="Add entry with interactive prompts")
+
 
     
     parser_add = subparsers.add_parser("add", help="Add a time entry")
@@ -101,6 +141,7 @@ if __name__ == "__main__":
         view_entries()
     elif args.command == "delete":
         delete_entry(args.id)
+    elif args.command == "prompt":
+        add_interactive()
     else:
-        parser.print_help()
-    
+        main_menu()
