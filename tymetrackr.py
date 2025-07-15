@@ -1,6 +1,8 @@
 import sqlite3
 import argparse
-from datetime import datetime
+import json
+import os
+from datetime import datetime, date
 
 def init_db():
     conn = sqlite3.connect('tymetrackr.db')
@@ -26,6 +28,41 @@ def calculate_total_hours(start, end):
     end_dt = datetime.strptime(end, time_format)
     duration = end_dt - start_dt
     return round(duration.total_seconds() / 3600, 2)
+
+def clock_in():
+    if os.path.exists("clockin.json"):
+        print("Already clocked in. Clock out before starting a new session.")
+        return
+
+    start_time = datetime.now().strftime("%H:%M")
+    current_date = date.today().isoformat()
+    with open("clockin.json", "w") as f:
+        json.dump({"date": current_date, "start": start_time}, f)
+
+    print(f"Clocked in at {start_time} on {current_date}")
+    
+def clock_out():
+    if not os.path.exists("clockin.json"):
+        print("No clock-in found. Please clock in first.")
+        return
+
+    with open("clockin.json", "r") as f:
+        session = json.load(f)
+
+    os.remove("clockin.json")
+
+    end_time = datetime.now().strftime("%H:%M")
+    print(f"Clocked out at {end_time}")
+
+    print("\nEnter details to save the entry:")
+    role = input("Role (e.g. TA, AppSec): ")
+    task = input("Task Description: ")
+    notes = input("Optional Notes: ")
+
+    try:
+        add_entry(session["date"], session["start"], end_time, role, task, notes)
+    except ValueError as e:
+        print(f"Error: {e}")
 
 def add_entry(date, start, end, role, task, notes):
     total_hours = calculate_total_hours(start, end)
@@ -87,30 +124,36 @@ def add_interactive():
 def main_menu():
     while True:
         print("\n==============================")
-        print("        TymeTrackr Menu")
+        print("       TymeTrackr Menu")
         print("==============================")
-        print("1. Add time entry")
-        print("2. View entries")
-        print("3. Delete an entry")
-        print("4. Quit")
+        print("1. Clock In")
+        print("2. Clock Out")
+        print("3. Add time entry")
+        print("4. View entries")
+        print("5. Delete an entry")
+        print("6. Quit")
         print("------------------------------")
-        choice = input("Choose an option (1-4): ")
+        choice = input("Choose an option (1–6): ")
 
         if choice == "1":
-            add_interactive()
+            clock_in()
         elif choice == "2":
-            view_entries()
+            clock_out()
         elif choice == "3":
+            add_interactive()
+        elif choice == "4":
+            view_entries()
+        elif choice == "5":
             entry_id = input("Enter the entry ID to delete: ")
             if entry_id.isdigit():
                 delete_entry(int(entry_id))
             else:
                 print("Invalid ID.")
-        elif choice == "4":
+        elif choice == "6":
             print("Goodbye!")
             break
         else:
-            print("Invalid choice. Please enter a number 1–4.")
+            print("Invalid choice. Please enter a number 1–6.")
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Time Tracking CLI Tool")
