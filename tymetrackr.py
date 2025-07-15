@@ -29,18 +29,6 @@ def calculate_total_hours(start, end):
     duration = end_dt - start_dt
     return round(duration.total_seconds() / 3600, 2)
 
-def clock_in():
-    if os.path.exists("clockin.json"):
-        print("Already clocked in. Clock out before starting a new session.")
-        return
-
-    start_time = datetime.now().strftime("%H:%M")
-    current_date = date.today().isoformat()
-    with open("clockin.json", "w") as f:
-        json.dump({"date": current_date, "start": start_time}, f)
-
-    print(f"Clocked in at {start_time} on {current_date}")
-    
 def clock_out():
     if not os.path.exists("clockin.json"):
         print("No clock-in found. Please clock in first.")
@@ -52,7 +40,27 @@ def clock_out():
     os.remove("clockin.json")
 
     end_time = datetime.now().strftime("%H:%M")
-    print(f"Clocked out at {end_time}")
+    start_time = session["start"]
+    date_logged = session["date"]
+
+    try:
+        total_hours = calculate_total_hours(start_time, end_time)
+    except ValueError as e:
+        print(f"Error: {e}")
+        return
+
+    print("\nSession Summary")
+    print("------------------------------")
+    print(f"Date       : {date_logged}")
+    print(f"Start Time : {start_time}")
+    print(f"End Time   : {end_time}")
+    print(f"Total Hours: {total_hours}")
+    print("------------------------------")
+
+    confirm = input("Save this session? (y/n): ").strip().lower()
+    if confirm != 'y':
+        print("Session discarded.")
+        return
 
     print("\nEnter details to save the entry:")
     role = input("Role (e.g. TA, AppSec): ")
