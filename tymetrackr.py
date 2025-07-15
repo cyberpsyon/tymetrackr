@@ -74,7 +74,7 @@ def delete_entry(entry_id):
     conn.close()
     
 def add_interactive():
-    print("\n📝 Add a Time Entry\n" + "-"*30)
+    print("\nAdd a Time Entry\n" + "-"*30)
     date = input("Date (YYYY-MM-DD): ")
     start = input("Start Time (HH:MM): ")
     end = input("End Time (HH:MM): ")
@@ -87,7 +87,7 @@ def add_interactive():
 def main_menu():
     while True:
         print("\n==============================")
-        print("      ⏱️  TymeTrackr Menu")
+        print("        TymeTrackr Menu")
         print("==============================")
         print("1. Add time entry")
         print("2. View entries")
@@ -105,12 +105,12 @@ def main_menu():
             if entry_id.isdigit():
                 delete_entry(int(entry_id))
             else:
-                print("❌ Invalid ID.")
+                print("Invalid ID.")
         elif choice == "4":
-            print("👋 Goodbye!")
+            print("Goodbye!")
             break
         else:
-            print("❌ Invalid choice. Please enter a number 1–4.")
+            print("Invalid choice. Please enter a number 1–4.")
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Time Tracking CLI Tool")
